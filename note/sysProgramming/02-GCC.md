@@ -1,34 +1,45 @@
-## 安装
+# table of contents
+- [安装](#安装)
+- [工作流程](#工作流程)
+  - [预处理](#预处理)
+  - [编译](#编译)
+  - [汇编](#汇编)
+  - [链接](#链接)
+- [参数](#参数)
+
+## [安装](#table-of-contents)
 ```bash
 sudo apt-get install gcc
 ```
 
-## 工作流程
-### 预处理
+## [工作流程](#table-of-contents)
+> ![GCC工作流程](..\sysProgramming\images\GCC工作流程.jpg)
+
+### [预处理](#table-of-contents)
 > 预处理器将源代码中的宏定义、头文件包含、条件编译等预处理指令进行处理，生成一个没有宏定义、没有注释、没有头文件包含、所有条件编译都已经决定的中间文件。
 ```bash
 gcc -E hello.c -o hello.i
 ```
 
-### 编译
+### [编译](#table-of-contents)
 > 编译器将预处理后的文件进行词法分析、语法分析、语义分析、优化和代码生成，生成汇编代码。
 ```bash
 gcc -S hello.i -o hello.s
 ```
 
-### 汇编
+### [汇编](#table-of-contents)
 > 汇编器将汇编代码转换成机器可以执行的指令，生成目标文件。
 ```bash
 gcc -c hello.s -o hello.o
 ```
 
-### 链接
+### [链接](#table-of-contents)
 > 链接器将目标文件和库文件进行链接，生成可执行文件。
 ```bash
 gcc hello.o -o hello
 ```
 
-## 参数
+## [参数](#table-of-contents)
 | 参数 | 说明 | 示例 | 结果 |
 | --- | --- | --- | --- |
 | -o | 指定输出文件名 | gcc -o hello hello.c | 生成可执行文件hello |
