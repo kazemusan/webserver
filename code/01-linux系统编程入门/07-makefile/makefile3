@@ -1,0 +1,8 @@
+src=sub.o mult.o add.o div.o main.o
+target=app
+
+$(target):$(src)
+	$(CC) $(src) -o $(target)
+
+%.o:%.c
+	$(CC) -c $< -o $@
