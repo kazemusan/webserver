@@ -13,7 +13,7 @@ sudo apt-get install gcc
 ```
 
 ## [工作流程](#table-of-contents)
-> ![GCC工作流程](..\sysProgramming\images\GCC工作流程.jpg)
+> ![GCC工作流程](../sysProgramming/images/GCC工作流程.jpg)
 
 ### [预处理](#table-of-contents)
 > 预处理器将源代码中的宏定义、头文件包含、条件编译等预处理指令进行处理，生成一个没有宏定义、没有注释、没有头文件包含、所有条件编译都已经决定的中间文件。
