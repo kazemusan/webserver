@@ -96,7 +96,49 @@ ssize_t write(int fd, const void *buf, size_t count);
 ## [FIFO](#table-of-contents)
 
 ```text
+有名管道（FIFO）不同于匿名管道之处在于它提供了一个路径名与之关联，以 FIFO 的文件形式存在于文件系统中，并且其打开方式与打开一个普通文件是一样的，这样即使与 FIFO 的创建进程不存在亲缘关系的进程，只要可以访问该路径，就能够彼此通过 FIFO 相互通信，因此，通过 FIFO 不相关的进程也能交换数据。
 
+FIFO 也是一种半双工的通信方式，数据只能单向流动，需要双向通信时，需要建立起两个 FIFO。
+
+FIFO 也是一种文件，它在文件系统中以一种特殊的方式存在，但它不是普通的文件，它不属于某种文件类型，它的文件类型是 FIFO，文件权限与创建它的进程的 umask 值有关。
+
+FIFO 也是一种特殊的文件，它不占用磁盘空间，它的数据在内存中，它的数据只在内存中存在，不会写入到磁盘中。当使用 FIFO 文件的进程退出时，FIFO 文件不被删除，只有当所有使用 FIFO 文件的进程都退出时，FIFO 文件才会被删除。
+
+FIFO 也是一种特殊的文件，它的创建不是由 open 函数来创建的，而是由 mkfifo 命令或函数来创建的，它的创建与打开是分开的，使用两个不同的函数，是两个不同的系统调用。
+```
+
+```c
+// 创建FIFO
+#include <sys/types.h>
+#include <sys/stat.h>
+int mkfifo(const char *pathname, mode_t mode);
+/*
+    功能：
+        创建一个FIFO文件
+    参数：
+        pathname：FIFO文件的路径名
+        mode：FIFO文件的权限
+    返回值：
+        成功：0
+        失败：-1
+*/
+
+// 打开FIFO
+// 打开FIFO的函数与打开普通文件的函数一样
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+int open(const char *pathname, int flags);
+/*
+    功能：
+        打开一个FIFO文件
+    参数：
+        pathname：FIFO文件的路径名
+        flags：打开方式
+    返回值：
+        成功：文件描述符
+        失败：-1
+*/
 ```
 
 ## [Message Queue](#table-of-contents)
