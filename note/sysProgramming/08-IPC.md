@@ -159,8 +159,238 @@ int open(const char *pathname, int flags);
 
 ## [Signal](#table-of-contents)
 
-```text
+### [conception](#table-of-contents)
 
+```text
+Signal 是 linux 系统 IPC 最古老的一种通信机制，它是一种异步通信机制，用于通知接收进程某个事件已经发生。
+
+有时被称为软件中断，它是一种软件层次的中断，与硬件中断不同，它不是由外部事件产生的，而是由软件自身产生的。
+
+引发信号的事件有很多种，比如：
+对于前台进程，用户按了 Ctrl+C ，这时会产生一个 SIGINT 信号，进程收到这个信号后，会终止运行。
+对于后台进程，用户按了 Ctrl+Z ，这时会产生一个 SIGTSTP 信号，进程收到这个信号后，会暂停运行。
+硬件发生了某个异常，这时会产生一个 SIGSEGV 信号，进程收到这个信号后，会终止运行。
+系统状态发生变化，这时会产生一个 SIGCHLD 信号，进程收到这个信号后，会处理子进程的退出状态。
+运行 kill 命令，这时会产生一个 SIGTERM 信号，进程收到这个信号后，会终止运行。
+```
+
+### [linux signal](#table-of-contents)
+
+> 可以使用 man 7 signal 查看信号的详细信息。
+| 信号处理方式 | 说明 |
+| :---: | :---: |
+| TERM | 默认方式，终止进程 |
+| IGN | 忽略信号 |
+| CORE | 终止进程并生成 core 文件 |
+| STOP | 暂停进程 |
+| CONT | 恢复进程 |
+| HAND | 由应用程序指定信号处理函数 |
+>
+> 可以使用 kill -l 命令查看 linux 系统支持的所有信号。其中前 31 个信号是 linux 系统默认的信号，后面的信号是 linux 系统扩展的信号。
+>
+> 常用到的信号：
+>> SIGINT：2，终端中断信号，通常是 Ctrl+C 产生，用于通知前台进程组终止进程。
+>>
+>> SIGQUIT：3，终端退出信号，通常是 Ctrl+\ 产生，用于通知前台进程组终止进程，并生成 core 文件。
+>>
+>> SIGKILL：9，终止信号，用于强制终止进程，进程不能捕获和忽略该信号。
+>>
+>> SIGSTOP：19，停止信号，用于暂停进程，进程不能捕获和忽略该信号。
+>>
+>> SIGCONT：18，继续信号，用于恢复进程，进程不能捕获和忽略该信号。
+>>
+>> SIGSEGV：11，段错误信号，用于通知进程发生了段错误。
+>>
+>> SIGCHLD：17，子进程退出信号，用于通知父进程子进程已经退出。
+>>
+>> SIGALRM：14，定时器信号，用于通知进程定时器已经超时。
+>>
+>> SIGUSR1：10，用户自定义信号1，用于通知进程用户自定义事件1已经发生。
+>>
+>> SIGUSR2：12，用户自定义信号2，用于通知进程用户自定义事件2已经发生。
+>
+
+### [function](#table-of-contents)
+
+```c
+// 信号处理函数
+#include <signal.h>
+typedef void (*sighandler_t)(int);
+sighandler_t signal(int signum, sighandler_t handler);
+/*
+    功能：
+        设置信号处理函数
+    参数：
+        signum：信号编号
+        handler：信号处理函数
+    返回值：
+        成功：返回原来的信号处理函数
+        失败：返回 SIG_ERR
+*/
+int segaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+/*
+    功能：
+        设置信号处理函数
+    参数：
+        signum：信号编号
+        act：新的信号处理函数
+        oldact：旧的信号处理函数
+    返回值：
+        成功：0
+        失败：-1
+*/
+
+// 发送信号
+#include <sys/types.h>
+#include <signal.h>
+int kill(pid_t pid, int sig);
+/*
+    功能：
+        向指定进程发送信号
+    参数：
+        pid：进程ID
+        sig：信号编号
+    返回值：
+        成功：0
+        失败：-1
+*/
+int raise(int sig);
+/*
+    功能：
+        向自身进程发送信号
+    参数：
+        sig：信号编号
+    返回值：
+        成功：0
+        失败：-1
+*/
+void abort(void);
+/*
+    功能：
+        终止进程
+    参数：
+        无
+    返回值：
+        无
+*/
+unsigned int alarm(unsigned int seconds);
+/*
+    功能：
+        设置定时器
+    参数：
+        seconds：定时器超时时间
+    返回值：
+        成功：返回原来的定时器超时时间
+        失败：返回0
+*/
+int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
+/*
+    功能：
+        设置定时器
+    参数：
+        which：定时器类型
+            - ITIMER_REAL：真实时间定时器
+            - ITIMER_VIRTUAL：用户态时间定时器
+            - ITIMER_PROF：用户态和内核态时间定时器
+        new_value：新的定时器超时时间
+        old_value：旧的定时器超时时间
+    返回值：
+        成功：0
+        失败：-1
+*/
+```
+
+### [signal set](#table-of-contents)
+
+```text
+信号集是一个用来存放信号的集合，信号集中的每个元素都对应一个信号，信号集中的每个元素都有一个编号，这个编号就是信号的编号。
+
+在 PCB 中有两个非常重要的信号集。一个称之为 “阻塞信号集” ，另一个称之为“未决信号集” 。
+这两个信号集都是内核使用位图机制来实现的。
+但操作系统不允许我们直接对这两个信号集进行位操作。而需自定义另外一个集合，借助信号集操作函数来对 PCB 中的这两个信号集进行修改。
+```
+
+```c
+// 信号集操作函数
+#include <signal.h>
+int sigemptyset(sigset_t *set);
+/*
+    功能：
+        清空信号集
+    参数：
+        set：信号集
+    返回值：
+        成功：0
+        失败：-1
+*/
+int sigfillset(sigset_t *set);
+/*
+    功能：
+        将所有信号添加到信号集中
+    参数：
+        set：信号集
+    返回值：
+        成功：0
+        失败：-1
+*/
+int sigaddset(sigset_t *set, int signum);
+/*
+    功能：
+        将指定信号添加到信号集中
+    参数：
+        set：信号集
+        signum：信号编号
+    返回值：
+        成功：0
+        失败：-1
+*/
+int sigdelset(sigset_t *set, int signum);
+/*
+    功能：
+        将指定信号从信号集中删除
+    参数：
+        set：信号集
+        signum：信号编号
+    返回值：
+        成功：0
+        失败：-1
+*/
+int sigismember(const sigset_t *set, int signum);
+/*
+    功能：
+        判断指定信号是否在信号集中
+    参数：
+        set：信号集
+        signum：信号编号
+    返回值：
+        成功：1
+        失败：0
+*/
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+/*
+    功能：
+        用自定义的信号集来设置阻塞信号集
+    参数：
+        how：操作方式
+            - SIG_BLOCK：将 set 指向的信号集中的信号添加到阻塞信号集中
+            - SIG_UNBLOCK：将 set 指向的信号集中的信号从阻塞信号集中删除
+            - SIG_SETMASK：将 set 指向的信号集中的信号设置为阻塞信号集
+        set：信号集
+        oldset：旧的阻塞信号集
+    返回值：
+        成功：0
+        失败：-1
+*/
+int sigpending(sigset_t *set);
+/*
+    功能：
+        获取未决信号集
+    参数：
+        set：未决信号集
+    返回值：
+        成功：0
+        失败：-1
+*/
 ```
 
 ## [memory-mapped](#table-of-contents)
