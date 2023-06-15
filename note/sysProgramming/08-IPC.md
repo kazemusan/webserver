@@ -13,6 +13,9 @@
   - [function](#function-1)
 - [Message Queue](#message-queue)
 - [Shared Memory](#shared-memory)
+  - [conception](#conception-3)
+  - [function](#function-2)
+  - [cmd](#cmd)
 - [Signal](#signal)
   - [conception](#conception-3)
   - [linux signal](#linux-signal)
@@ -176,9 +179,111 @@ int open(const char *pathname, int flags);
 
 ## [Shared Memory](#table-of-contents)
 
-```text
+### [conception](#table-of-contents)
 
+```text
+共享内存允许多个进程共享一块内存区域，这段共享内存由一个进程创建，但多个进程都可以访问。
+
+共享内存是最快的 IPC 方式，因为共享内存段是直接映射到进程的虚拟地址空间中，所以不需要数据的拷贝操作。而其他的 IPC 方式，都需要在内核和用户空间之间进行数据的拷贝。
 ```
+
+### [function](#table-of-contents)
+
+```c
+// 创建共享内存
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+int shmget(key_t key, size_t size, int shmflg);
+/*
+    功能：
+        创建一个共享内存
+    参数：
+        key：共享内存的键值
+        size：共享内存的大小
+        shmflg：权限标志
+    返回值：
+        成功：共享内存的标识符
+        失败：-1
+*/
+
+// 连接共享内存
+void *shmat(int shmid, const void *shmaddr, int shmflg);
+/*
+    功能：
+        连接一个共享内存
+    参数：
+        shmid：共享内存的标识符
+        shmaddr：连接共享内存的地址
+            - NULL：由内核指定
+            - 非NULL：用户指定
+        shmflg：权限标志
+    返回值：
+        成功：共享内存的首地址
+        失败：(void *)-1
+*/
+
+// 断开共享内存
+int shmdt(const void *shmaddr);
+/*
+    功能：
+        断开一个共享内存
+    参数：
+        shmaddr：共享内存的首地址
+    返回值：
+        成功：0
+        失败：-1
+*/
+
+// 控制共享内存
+int shmctl(int shmid, int cmd, struct shmid_ds *buf);
+/*
+    功能：
+        控制一个共享内存
+    参数：
+        shmid：共享内存的标识符
+        cmd：控制命令
+            - IPC_STAT：获取共享内存的状态
+            - IPC_SET：设置共享内存的状态
+            - IPC_RMID：删除共享内存
+        buf：共享内存的状态
+    返回值：
+        成功：0
+        失败：-1
+*/
+
+// 生成键值
+key_t ftok(const char *pathname, int proj_id);
+/*
+    功能：
+        生成一个键值
+    参数：
+        pathname：文件路径名
+        proj_id：项目ID
+    返回值：
+        成功：键值
+        失败：-1
+*/
+```
+
+### [cmd](#table-of-contents)
+
+> 可以通过 ipcs 命令查看系统中的共享内存。
+| 参数 | 说明 |
+| :---: | :---: |
+| -a | 显示所有共享内存的信息 |
+| -m | 显示当前用户创建的共享内存的信息 |
+| -q | 显示当前用户创建的消息队列的信息 |
+| -s | 显示当前用户创建的信号量的信息 |
+>
+> 可以通过 ipcrm 命令删除共享内存。
+| 参数 | 说明 |
+| :---: | :---: |
+| -a | 删除所有共享内存 |
+| -m | 删除当前用户创建的共享内存 |
+| -q | 删除当前用户创建的消息队列 |
+| -s | 删除当前用户创建的信号量 |
+>
 
 ## [Signal](#table-of-contents)
 
