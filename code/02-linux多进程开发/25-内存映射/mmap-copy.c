@@ -65,3 +65,15 @@ int main() {
 
     return 0;
 }
+
+/*
+    memcpy(ptr, str, strlen(str) + 1);
+    功能：
+        将str指向的字符串拷贝到ptr指向的共享内存中
+    参数：
+        ptr：共享内存的首地址
+        str：要拷贝的字符串
+        strlen(str) + 1：要拷贝的字符串的长度
+    返回值：
+        拷贝的字符串的首地址
+*/
