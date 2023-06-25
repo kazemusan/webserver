@@ -82,7 +82,7 @@ int main() {
             char cliIp[16];
             inet_ntop(AF_INET, &cliaddr.sin_addr.s_addr, cliIp, sizeof(cliIp));
             unsigned short cliPort = ntohs(cliaddr.sin_port);
-            printf("client ip is : %s, prot is %d\n", cliIp, cliPort);
+            printf("client ip is : %s, port is %d\n", cliIp, cliPort);
 
             // 接收客户端发来的数据
             char recvBuf[1024];
