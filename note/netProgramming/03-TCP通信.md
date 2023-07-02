@@ -184,3 +184,90 @@ TCP协议是面向连接的协议，即在通信之后必须断开连接，而�
 1.客户端接收到服务器的断开连接请求：ACK=1
 2.客户端会回复服务器一个确认序号：ack=服务器的序号 + 1
 ```
+
+## [TCP状态转换](#table-of-contents)
+
+> ![TCP状态转换](./images/TCP状态转换.png)
+
+```text
+2MSL：Maximum Segment Lifetime）
+主动断开的一方进入 TIME_WAIT 状态，等待 2MSL 后才进入 CLOSED 状态，这是为了保证最后一个 ACK 报文能够到达对方，从而让对方进入 CLOSED 状态。
+
+半关闭
+当 TCP 链接中 A 向 B 发送 FIN 请求关闭，另一端 B 回应 ACK 之后（A 端进入 FIN_WAIT_2 状态），并没有立即发送 FIN 给 A，A 方处于半连接状态（半开关），此时 A 可以接收 B 发送的数据，但是 A 已经不能再向 B 发送数据。
+```
+
+> 使用 API 实现半连接
+
+```c
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h> // 包含了这个头文件，上面两个头文件可省略
+
+int shutdown(int sockfd, int how);
+    功能：关闭套接字的一部分功能
+    
+    参数：
+        sockfd：套接字描述符
+        how：关闭方式
+            SHUT_RD：关闭读功能
+            SHUT_WR：关闭写功能
+            SHUT_RDWR：关闭读写功能
+    
+    返回值：
+        成功：返回0
+        失败：返回-1，errno被设置为相应的错误码
+```
+
+```text
+使用 close 中止一个连接，但它只是减少描述符的引用计数，并不直接关闭连接，只有当描述符的引用计数为 0 时才关闭连接。shutdown 不考虑描述符的引用计数，直接关闭描述符。也可选择中止一个方向的连接，只中止读或只中止写。
+
+如果有多个进程共享一个套接字，close 每被调用一次，计数减 1 ，直到计数为 0 时，也就是所用进程都调用了 close，套接字将被释放。
+
+在多进程中如果一个进程调用了 shutdown(sfd, SHUT_RDWR) 后，其它的进程将无法进行通信。但如果一个进程 close(sfd) 将不会影响到其它进程。
+```
+
+## [端口复用](#table-of-contents)
+
+```text
+在 TCP 通信中，如果服务器端主动断开连接，那么服务器端的端口将处于 TIME_WAIT 状态，此时如果再次启动服务器程序，将无法绑定到该端口，因为该端口处于 TIME_WAIT 状态，此时如果想要再次启动服务器程序，就需要等待 2MSL 时间，这样就会导致服务器程序不能立即启动。
+
+为了解决这个问题，可以使用端口复用，即在服务器程序中设置 SO_REUSEADDR 选项，这样就可以立即启动服务器程序。
+
+SO_REUSEADDR 选项的作用是允许在同一端口上启动同一服务器的多个实例，但每个实例绑定的 IP 地址不同。这通常用于同时侦听多个接口（对于 TCP 服务器应用程序，侦听多个接口可以实现负载均衡）。
+```
+
+> 使用 API 实现端口复用
+
+```c
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h> // 包含了这个头文件，上面两个头文件可省略
+
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+    功能：设置套接字选项
+    
+    参数：
+        sockfd：套接字描述符
+        level：选项所在的协议层
+            SOL_SOCKET：通用套接字选项
+            IPPROTO_TCP：TCP协议选项
+            IPPROTO_IP：IP协议选项
+        optname：选项名称
+            SO_REUSEADDR：允许在同一端口上启动同一服务器的多个实例
+            SO_REUSEPORT：允许完全重复的绑定
+        optval：指向存放选项值的缓冲区
+            1：开启
+            0：关闭
+        optlen：optval的长度，通常为sizeof(int)
+    
+    返回值：
+        成功：返回0
+        失败：返回-1，errno被设置为相应的错误码
+```
+
+```text
+端口复用，设置的时机是在服务器绑定端口之前。
+setsockopt();
+bind();
+```
