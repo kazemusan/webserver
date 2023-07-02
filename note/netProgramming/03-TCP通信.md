@@ -1,8 +1,14 @@
 # table of contents
 
-## [TCP通信流程](#table-of-contents)
+- [TCP通信流程](#tcp通信流程)
+  - [通信函数](#通信函数)
+  - [三次握手](#三次握手)
+  - [滑动窗口](#滑动窗口)
+  - [四次挥手](#四次挥手)
+- [TCP状态转换](#tcp状态转换)
+- [端口复用](#端口复用)
 
-> TCP通信流程如下：
+## [TCP通信流程](#table-of-contents)
 
 > ![TCP通信流程](./images/TCP通信流程.png)
 

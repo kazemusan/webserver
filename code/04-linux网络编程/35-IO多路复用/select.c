@@ -27,7 +27,7 @@ int main() {
     int maxfd = lfd;
 
     while(1) {
-
+        // 因为select会改变集合的内容，所以每次都要重新赋值
         tmp = rdset;
 
         // 调用select系统函数，让内核帮检测哪些文件描述符有数据
