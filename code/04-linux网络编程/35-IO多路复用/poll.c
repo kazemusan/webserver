@@ -1,3 +1,18 @@
+/*
+    #include <poll.h>
+    int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+    作用：监控文件描述符的状态变化
+
+    参数：
+        fds：监控的文件描述符的数组
+        nfds：监控的文件描述符的个数
+        timeout：超时时间，-1表示阻塞等待，0表示非阻塞，其他值表示等待的最大时间
+
+    返回值：
+        -1：失败
+        0：超时
+        >0：就绪的文件描述符的个数
+*/
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>

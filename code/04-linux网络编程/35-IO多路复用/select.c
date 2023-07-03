@@ -1,3 +1,21 @@
+/*
+    #include <sys/select.h>
+
+    int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+    作用：监控文件描述符的状态变化
+
+    参数：
+        nfds：监控的文件描述符的个数，一般是最大的文件描述符+1
+        readfds：监控可读事件的文件描述符集合
+        writefds：监控可写事件的文件描述符集合
+        exceptfds：监控异常事件的文件描述符集合
+        timeout：超时时间，NULL表示阻塞等待，0表示非阻塞，其他值表示等待的最大时间
+
+    返回值：
+        -1：失败
+        0：超时
+        >0：就绪的文件描述符的个数
+*/
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -27,7 +45,7 @@ int main() {
     int maxfd = lfd;
 
     while(1) {
-        // 因为select会改变集合的内容，所以每次都要重新赋值
+        // select会改变集合的内容，但是我们需要保留原来的集合，所以需要拷贝一份
         tmp = rdset;
 
         // 调用select系统函数，让内核帮检测哪些文件描述符有数据
