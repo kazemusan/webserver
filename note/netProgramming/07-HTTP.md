@@ -1,5 +1,12 @@
 # table of contents
 
+- [HTTP](#http)
+- [工作原理](#工作原理)
+- [HTTP 请求报文](#http-请求报文)
+- [HTTP 响应报文](#http-响应报文)
+- [HTTP 请求方式](#http-请求方式)
+- [HTTP 状态码](#http-状态码)
+
 ## [HTTP](#table-of-contents)
 
 ```text
@@ -100,3 +107,73 @@ Connection: keep-alive
 ETag: "59f8f0c0-8a"
 Accept-Ranges: bytes
 ```
+
+```text
+状态行：
+    协议版本：HTTP/1.1
+    状态码：200
+    状态描述：OK
+
+响应头部：
+    Date：响应时间
+    Content-Type：响应数据类型
+    Content-Length：响应数据长度
+    Last-Modified：资源最后修改时间
+    Connection：连接类型，keep-alive 或 close
+    ETag：资源标识符
+    Accept-Ranges：可接受的数据范围
+
+空行：
+    响应头部结束的标志，空行后面的数据作为响应数据处理
+
+响应数据：
+    HTML 页面
+```
+
+## [HTTP 请求方式](#table-of-contents)
+
+```text
+1. GET：向指定资源发出显示请求。使用 GET 方法应该只用在读取数据，而不应当被用于产生“副作用”的操作中，例如在 Web Application 中。其中一个原因是 GET 可能会被网络蜘蛛等随意访问。
+
+2. HEAD：与 GET 方法一样，都是向服务器发出指定资源的请求。只不过服务器将不传回资源的本文部分。它的好处在于，使用这个方法可以在不必传输全部内容的情况下，就可以获取其中“关于该资源的信息”（元信息或称元数据）。
+
+3. POST：向指定资源提交数据，请求服务器进行处理（例如提交表单或者上传文件）。数据被包含在请求本文中。这个请求可能会创建新的资源或修改现有资源，或二者皆有。
+
+4. PUT：向指定资源位置上传其最新内容。
+
+5. DELETE：请求服务器删除 Request-URI 所标识的资源。
+
+6. TRACE：回显服务器收到的请求，主要用于测试或诊断。
+
+7. OPTIONS：这个方法可使服务器传回该资源所支持的所有 HTTP 请求方法。用'*'来代替资源名称，向 Web 服务器发送 OPTIONS 请求，可以测试服务器功能是否正常运作。
+
+8. CONNECT：HTTP/1.1 协议中预留给能够将连接改为管道方式的代理服务器。通常用于SSL加密服务器的链接（经由非加密的 HTTP 代理服务器）。
+```
+
+## [HTTP 状态码](#table-of-contents)
+
+```text
+HTTP 状态码由三位数字组成，第一个数字定义了响应的类别，且有五种可能取值：
+    1xx：指示信息--表示请求已接收，继续处理
+    2xx：成功--表示请求已被成功接收、理解、接受
+    3xx：重定向--要完成请求必须进行更进一步的操作
+    4xx：客户端错误--请求有语法错误或请求无法实现
+    5xx：服务器端错误--服务器未能实现合法的请求
+```
+
+> 常见状态码：
+
+| 状态码 | 状态描述 | 说明 |
+| --- | --- | --- |
+| 200 | OK | 请求成功 |
+| 301 | Moved Permanently | 永久重定向 |
+| 302 | Found | 临时重定向 |
+| 304 | Not Modified | 资源未修改 |
+| 400 | Bad Request | 请求报文语法错误 |
+| 401 | Unauthorized | 需要认证 |
+| 403 | Forbidden | 请求资源被禁止 |
+| 404 | Not Found | 请求资源不存在 |
+| 500 | Internal Server Error | 服务器内部错误 |
+| 503 | Service Unavailable | 服务器暂时不可用 |
+
+> 更多状态码参考：[HTTP 状态码](https://baike.baidu.com/item/HTTP%E7%8A%B6%E6%80%81%E7%A0%81/5053660?fr=aladdin)
