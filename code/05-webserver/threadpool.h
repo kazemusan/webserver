@@ -11,17 +11,18 @@
 // 用于创建线程池，管理线程池中的线程，以及添加任务到线程池中
 // 定义为模板类是为了代码复用，模板参数T是任务类
 template <typename T>
-class threadpool {
+class threadpool
+{
 public:
     threadpool(int thread_number = 8, int max_requests = 10000);
     ~threadpool();
 
     // 往请求队列中添加任务
-    bool append(T* request);
+    bool append(T *request);
 
 private:
     // 工作线程运行的函数，它不断从工作队列中取出任务并执行
-    static void* worker(void* arg);
+    static void *worker(void *arg);
     // 线程运行的函数，它不断地等待队列中的任务，然后处理
     void run();
 

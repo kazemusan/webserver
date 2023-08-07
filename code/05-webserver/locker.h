@@ -8,21 +8,23 @@
 // 线程同步机制封装类
 
 // 互斥锁类
-class locker {
+class locker
+{
 public:
     locker();
     ~locker();
 
     bool lock();
     bool unlock();
-    pthread_mutex_t* get();
+    pthread_mutex_t *get();
 
 private:
     pthread_mutex_t m_mutex;
 };
 
 // 信号量类
-class sem {
+class sem
+{
 public:
     sem();
     sem(int num);
@@ -36,7 +38,8 @@ private:
 };
 
 // 条件变量类
-class cond {
+class cond
+{
 public:
     cond();
     ~cond();
@@ -50,4 +53,4 @@ private:
     pthread_cond_t m_cond;
 };
 
-# endif
+#endif
